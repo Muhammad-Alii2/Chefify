@@ -1,0 +1,104 @@
+
+
+.select {
+  background-color: black;
+  color: white;
+  border: 2px solid white;
+border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 12px;
+  appearance: none; 
+  margin-left: 12px;/* Removes default arrow icon */
+}
+
+.select option {
+  background-color: black;
+  color: white;
+}
+
+/* Styling for when the select element is disabled */
+.select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Improved CSS for a book-like text box */
+
+.book-text-box {
+  width: 600px;
+  height: 700px;
+  margin-right: 200px;
+  margin-top: 100px;
+  margin-bottom: 50px;
+  position: relative; /* For layering elements */
+  overflow: hidden; /* Prevent images from overflowing */
+}
+
+.book-text-box::before, /* Background with contrast images */
+.book-text-box::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.book-text-box {
+  position: relative;
+  width: 60%; /* Adjust the width as needed */
+  max-width: 800px;/* Adjust width as needed */
+  height: auto;
+  margin: 0 auto;
+  /* Adjust margins for positioning */
+  
+  overflow: hidden;
+}
+
+.book-text-box::before {
+  margin-top: 100px;
+  /* Ensure the image doesn't exceed the width of its container */
+  /* Light yellow background image (replace with your image) */
+  background-image: url("../../images/bg.png");
+  opacity: 0.8; /* Adjust transparency for text visibility */
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.book-text-box::after {
+  /* Contrasting image on top (replace with your image) */
+  /* Adjust position and blend mode for desired effect */
+  content: "";
+  top: 50px; /* Increase the margin from the top */
+  left: 20px;
+  transform: rotate(-5deg); /* Optional tilt for a dynamic look */
+  mix-blend-mode: multiply; /* Darkens the background for image visibility */
+  position: absolute;
+  width: 50%;
+  height: 50%;
+}
+
+.book-inner {
+  /* Notetop: 100px;book-like inner container */
+  top: 100px;
+  position: relative;
+  margin-top: 70px; /* Adjusted top margin */
+  margin-bottom: 70px; /* Fixed bottom margin */
+  margin-left: 0; /* Removed margin shorthand */
+  margin-right: 0; /* Removed margin shorthand */
+  padding: 50px;
+  
+  left: 80px;
+   
+}
+
+.recipe-text { /* Handwritten font style (replace with preferred font) */
+  font-family: "Great Vibes", cursive; /* Example handwritten font */
+  font-size: 18px; /* Adjust font size for readability */
+  line-height: 1.5; /* Adjust line spacing for aesthetics */
+}
