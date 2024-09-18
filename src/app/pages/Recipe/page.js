@@ -202,7 +202,7 @@ function App() {
     // Construct query parameters
     const queryParams = new URLSearchParams(recipeInputs).toString();
 
-    const url = `http://localhost:3001/recipeStream?${queryParams}`;
+    const url = `/api/recipeGenerator?${queryParams}`;
     eventSourceRef.current = new EventSource(url);
 
     eventSourceRef.current.onmessage = (event) => {
