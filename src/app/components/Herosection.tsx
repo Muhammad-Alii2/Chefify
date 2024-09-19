@@ -3,12 +3,12 @@ import { Link } from "react-router-dom";
 import { Spotlight } from './ui/Spotlight';
 import { Button } from "./ui/moving-border";
 import { BackgroundGradient } from "./ui/background-gradient";
-
+import SignInButton from "../components/SignInButton";
 import Image from "next/image";
 function Herosection() {
   return (
 <div>
-
+<SignInButton />
   <div className="h-auto md:h-[40rem] w-full rounded-md flex flex-col items-center justify-center relative overflow-hidden mx-auto py-10 md:py-0">
     <div className="p-4 relative z-10 w-full text-center">
     <Spotlight className="-top-40 left-0 md:left-60 md:-top-20" fill="white" />

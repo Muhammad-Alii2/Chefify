@@ -25,6 +25,14 @@ const config: Config = {
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
       keyframes: {
+        shimmer: {
+          from: {
+            backgroundPosition: "0 0",
+          },
+          to: {
+            backgroundPosition: "-200% 0",
+          },
+        },
         spotlight: {
           "0%": {
             opacity: '0',
@@ -34,6 +42,7 @@ const config: Config = {
             opacity: '1',
             transform: "translate(-50%,-40%) scale(1)",
           },
+
         },
       },
     },
