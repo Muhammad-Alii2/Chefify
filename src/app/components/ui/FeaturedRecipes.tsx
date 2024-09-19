@@ -1,5 +1,4 @@
 "use client";  // This marks the component as a Client Component
-
 import { useEffect, useState } from "react";
 
 interface FeaturedRecipeProps {
@@ -23,6 +22,7 @@ export default function FeaturedRecipe({ videoId }: FeaturedRecipeProps) {
       });
       
       const data = await response.json();  // Parse the API response
+      console.log('API Response:', data);  // Debug API response
       if (data.success) {
         setRelatedVideos(data.videoIds);  // Save related video IDs
       } else {
@@ -34,9 +34,9 @@ export default function FeaturedRecipe({ videoId }: FeaturedRecipeProps) {
     setLoading(false);
   };
 
-  
   useEffect(() => {
     if (videoId) fetchRelatedVideos();
+    console.log('Video ID:', videoId); // Add this line to verify the videoId
   }, [videoId]);
 
   return (
@@ -45,12 +45,12 @@ export default function FeaturedRecipe({ videoId }: FeaturedRecipeProps) {
       {loading && <p>Loading related videos...</p>}  {/* Show loading message */}
       {!loading && relatedVideos.length > 0 ? (  
         <ul>
-          {relatedVideos.map((video) => (
-            <li key={video}>
+          {relatedVideos.map((id) => (
+            <li key={id}>
               <iframe
                 width="560"
                 height="315"
-                src={`https://www.youtube.com/embed/${video}`}
+                src={`https://www.youtube.com/embed/${id}`}
                 title="YouTube video"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -60,7 +60,7 @@ export default function FeaturedRecipe({ videoId }: FeaturedRecipeProps) {
           ))}
         </ul>
       ) : (
-        <p>No related videos found.</p>  // Show message if no related videos are found
+        <p>No related videos found.</p> 
       )}
     </div>
   );
