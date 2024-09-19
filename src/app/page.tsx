@@ -1,6 +1,7 @@
 import Herosection from "./components/Herosection";
 import FeaturedRecipes from "./components/ui/FeaturedRecipes";
 import Footer from "./components/ui/Footer";
+import { prisma } from "@/app/utils/db";
 
 export default function Home() {
   return (
@@ -11,7 +12,6 @@ export default function Home() {
  <Herosection />
  <FeaturedRecipes />
  <Footer />
-
        </main>
 
 

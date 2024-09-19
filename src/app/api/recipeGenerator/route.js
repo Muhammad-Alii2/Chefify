@@ -1,5 +1,9 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import { PrismaClient } from '@prisma/client';
+import { searchYouTube } from "../../utils/yt";
+
+const prisma = new PrismaClient();
 
 async function fetchOpenAICompletionsStream(messages, callback) {
   const OPEN_API_KEY = process.env.OPENAI_API_KEY;
@@ -24,6 +28,25 @@ async function fetchOpenAICompletionsStream(messages, callback) {
   }
 }
 
+async function saveRecipe(recipe, videoIds) {
+  try {
+    // Save the recipe and related videos
+    const savedRecipe = await prisma.recipe.create({
+      data: {
+        ...recipe,
+        videos: {
+          create: videoIds.map(youtubeId => ({
+            youtubeId,
+          })),
+        },
+      },
+    });
+    console.log('Recipe saved to database with videos:', savedRecipe);
+  } catch (error) {
+    console.error('Error saving recipe to database:', error);
+  }
+}
+
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const ingredients = searchParams.get('ingredients');
@@ -35,8 +58,11 @@ export async function GET(req) {
   // Create a ReadableStream to stream data
   const stream = new ReadableStream({
     async start(controller) {
+      let fullRecipe = '';
+      let recipeName = '';
+
       // Function to send messages as chunks
-      const sendEvent = (chunk) => {
+      const sendEvent = async (chunk) => {
         let chunkResponse;
         if (chunk.choices[0].finish_reason === "stop") {
           // End the stream once the completion is done
@@ -44,6 +70,32 @@ export async function GET(req) {
             `data: ${JSON.stringify({ action: "close" })}\n\n`
           );
           controller.close();
+
+          // Search for videos on YouTube
+          const videoIds = await searchYouTube(recipeName);
+          console.log(videoIds);
+          
+          // Take the top 5 video IDs
+          const topVideoIds = videoIds.slice(0, 5);
+          console.log(topVideoIds);
+
+          // Save the complete recipe and video IDs
+          const recipe = {
+            name: recipeName || 'Unnamed Recipe', // Use the extracted name or a default
+            ingredients: ingredients,
+            mealType: mealType,
+            cuisine: cuisine,
+            cookingTime: cookingTime,
+            complexity: complexity,
+            instructions: fullRecipe
+          };
+          await saveRecipe(recipe, topVideoIds);
+
+          return NextResponse.json({
+            success: true,
+            recipe: recipe,
+            videoIds: topVideoIds
+          });
         } else {
           if (
             chunk.choices[0].delta.role &&
@@ -57,6 +109,13 @@ export async function GET(req) {
               action: "chunk",
               chunk: chunk.choices[0].delta.content,
             };
+            fullRecipe += chunk.choices[0].delta.content; // Accumulate the recipe
+
+            // Simple heuristic to extract recipe name from the response
+            const nameMatch = fullRecipe.match(/Recipe Name:\s*(.*)/);
+            if (nameMatch) {
+              recipeName = nameMatch[1].trim();
+            }
           }
           // Enqueue each chunk as a part of the response
           controller.enqueue(
@@ -80,7 +139,7 @@ export async function GET(req) {
         "The recipe should highlight the fresh and vibrant flavors of the ingredients."
       );
       prompt.push(
-        "Also give the recipe a suitable name in its local language based on cuisine preference."
+        "Also give the recipe a suitable name in its local language based on cuisine preference, and include it as 'Recipe Name: <Name>'."
       );
 
       const messages = [
