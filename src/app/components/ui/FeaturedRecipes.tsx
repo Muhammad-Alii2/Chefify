@@ -5,7 +5,7 @@ interface FeaturedRecipeProps {
   videoId: string;  
 }
 
-export default function FeaturedRecipe({ videoId }: FeaturedRecipeProps) {
+export default function FeaturedRecipe() {
   const [relatedVideos, setRelatedVideos] = useState<string[]>([]);  // Store the related video IDs
   const [loading, setLoading] = useState(false);  // Handle the loading state
 
@@ -13,12 +13,11 @@ export default function FeaturedRecipe({ videoId }: FeaturedRecipeProps) {
   const fetchRelatedVideos = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/relatedVideos", {
+      const response = await fetch("/api/getSuggestions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ videoId }),  // Send the videoId to the backend API
       });
       
       const data = await response.json();  // Parse the API response
@@ -35,9 +34,8 @@ export default function FeaturedRecipe({ videoId }: FeaturedRecipeProps) {
   };
 
   useEffect(() => {
-    if (videoId) fetchRelatedVideos();
-    console.log('Video ID:', videoId); // Add this line to verify the videoId
-  }, [videoId]);
+    fetchRelatedVideos();
+  }, []);
 
   return (
     <div>
