@@ -1,9 +1,8 @@
 import OpenAI from "openai";
+import { getAuthSession } from "@/app/utils/auth";
+import {prisma} from "../../utils/db"
 import { NextResponse } from "next/server";
-import { PrismaClient } from '@prisma/client';
-import { searchYouTube } from "../../utils/yt";
-
-const prisma = new PrismaClient();
+import { searchYouTube, getRelatedVideos } from "../../utils/yt";
 
 async function fetchOpenAICompletionsStream(messages, callback) {
   const OPEN_API_KEY = process.env.OPENAI_API_KEY;
@@ -28,17 +27,13 @@ async function fetchOpenAICompletionsStream(messages, callback) {
   }
 }
 
-async function saveRecipe(recipe, videoIds) {
+async function saveRecipe(userId, recipe, videoIds) {
   try {
-    // Save the recipe and related videos
     const savedRecipe = await prisma.recipe.create({
       data: {
+        userId,
         ...recipe,
-        videos: {
-          create: videoIds.map(youtubeId => ({
-            youtubeId,
-          })),
-        },
+        videoIds
       },
     });
     console.log('Recipe saved to database with videos:', savedRecipe);
@@ -47,7 +42,66 @@ async function saveRecipe(recipe, videoIds) {
   }
 }
 
+async function saveRelatedVideos(userId) {
+  const recipes = await prisma.recipe.findMany({
+    where: {
+      userId,
+    },
+    select: {
+      videoIds: true,
+    },
+  });
+
+  const allVideoIds = recipes.flatMap(recipe => recipe.videoIds);
+
+  console.log(`All video IDs for user ${userId}:`, allVideoIds);
+
+  if (allVideoIds.length === 0) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "No video ids for this user",
+      },
+      { status: 500 }
+    );
+  }
+
+  const randomIndex = Math.floor(Math.random() * allVideoIds.length);
+
+  const randomVideoId = allVideoIds[randomIndex];
+
+  console.log(`Random video ID for user ${userId}:`, randomVideoId);
+
+  const videoIds = await getRelatedVideos(randomVideoId);
+
+  const shuffledVideoIds = videoIds.sort(() => 0.5 - Math.random());
+
+  const selectedVideoIds = shuffledVideoIds.slice(0, 5);
+
+  await prisma.suggestion.upsert({
+    where: {
+      userId,
+    },
+    update: {
+      videoIds: selectedVideoIds,
+    },
+    create: {
+      userId,
+      videoIds: selectedVideoIds,
+    },
+  });
+}
+
 export async function GET(req) {
+  const session = await getAuthSession()
+
+  if (!session) {
+    return NextResponse.json({
+      success: false,
+      error: "Unauthorized request"
+    },{ status: 500 })
+  }
+
   const { searchParams } = new URL(req.url);
   const ingredients = searchParams.get('ingredients');
   const mealType = searchParams.get('mealType');
@@ -73,11 +127,6 @@ export async function GET(req) {
 
           // Search for videos on YouTube
           const videoIds = await searchYouTube(recipeName);
-          console.log(videoIds);
-          
-          // Take the top 5 video IDs
-          const topVideoIds = videoIds.slice(0, 5);
-          console.log(topVideoIds);
 
           // Save the complete recipe and video IDs
           const recipe = {
@@ -89,12 +138,14 @@ export async function GET(req) {
             complexity: complexity,
             instructions: fullRecipe
           };
-          await saveRecipe(recipe, topVideoIds);
+          await saveRecipe(session.user.id, recipe, videoIds);
+
+          await saveRelatedVideos(session.user.id)
 
           return NextResponse.json({
             success: true,
-            recipe: recipe,
-            videoIds: topVideoIds
+            recipe,
+            videoIds
           });
         } else {
           if (
