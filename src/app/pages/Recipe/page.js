@@ -146,6 +146,7 @@ const BottomGradient = () => {
 };
 
 function App() {
+  const [videoIds, setVideoIds] = useState("");
   const [recipeData, setRecipeData] = useState(null);
   const [recipeText, setRecipeText] = useState("");
   const [text, setText] = useState("");
@@ -205,14 +206,17 @@ function App() {
     const url = `/api/recipeGenerator?${queryParams}`;
     eventSourceRef.current = new EventSource(url);
 
-    eventSourceRef.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log(data);
+    eventSourceRef.current.onmessage = async (event) => {
+      const data = await JSON.parse(event.data);
 
       if (data.action === "close") {
         closeEventStream();
       } else if (data.action === "chunk") {
         setRecipeText((prev) => prev + data.chunk);
+      } else if (data.action === "complete") {
+        // Handle the final recipe and videoIds
+        const { videoIds } = await data;
+        setVideoIds(videoIds);
       }
     };
 
@@ -273,6 +277,13 @@ function App() {
             targetLanguage={selectedLanguage}
           />
         </div>
+      </div>
+      <div>
+        {videoIds && videoIds.length > 0 ? (
+          videoIds.map((id) => <p>{id}</p>)
+        ) : (
+          <p>No video IDs available</p>
+        )}
       </div>
       <footer></footer>
     </>

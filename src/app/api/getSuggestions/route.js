@@ -29,8 +29,6 @@ export async function POST(req, res) {
         },{ status: 500 })
     }
 
-    console.log(`Video IDs for user ${session.user.id}:`, suggestion.videoIds);
-
     return NextResponse.json({
     success: true,
     videoIds: suggestion.videoIds,
