@@ -54,8 +54,6 @@ async function saveRelatedVideos(userId) {
 
   const allVideoIds = recipes.flatMap(recipe => recipe.videoIds);
 
-  console.log(`All video IDs for user ${userId}:`, allVideoIds);
-
   if (allVideoIds.length === 0) {
     return NextResponse.json(
       {
@@ -69,8 +67,6 @@ async function saveRelatedVideos(userId) {
   const randomIndex = Math.floor(Math.random() * allVideoIds.length);
 
   const randomVideoId = allVideoIds[randomIndex];
-
-  console.log(`Random video ID for user ${userId}:`, randomVideoId);
 
   const videoIds = await getRelatedVideos(randomVideoId);
 
@@ -119,12 +115,6 @@ export async function GET(req) {
       const sendEvent = async (chunk) => {
         let chunkResponse;
         if (chunk.choices[0].finish_reason === "stop") {
-          // End the stream once the completion is done
-          controller.enqueue(
-            `data: ${JSON.stringify({ action: "close" })}\n\n`
-          );
-          controller.close();
-
           // Search for videos on YouTube
           const videoIds = await searchYouTube(recipeName);
 
@@ -138,15 +128,25 @@ export async function GET(req) {
             complexity: complexity,
             instructions: fullRecipe
           };
+
           await saveRecipe(session.user.id, recipe, videoIds);
+          await saveRelatedVideos(session.user.id);
 
-          await saveRelatedVideos(session.user.id)
-
-          return NextResponse.json({
-            success: true,
+          // Send the final recipe and videoIds as a chunk in the stream
+          chunkResponse = {
+            action: "complete",
             recipe,
             videoIds
-          });
+          };
+          controller.enqueue(
+            `data: ${JSON.stringify(chunkResponse)}\n\n`
+          );
+
+          // End the stream after sending recipe and videoIds
+          controller.enqueue(
+            `data: ${JSON.stringify({ action: "close" })}\n\n`
+          );
+          controller.close();
         } else {
           if (
             chunk.choices[0].delta.role &&
