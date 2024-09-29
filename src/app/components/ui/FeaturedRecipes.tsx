@@ -1,8 +1,5 @@
 "use client"; // This marks the component as a Client Component
 import { useEffect, useState } from "react";
-import { Card } from "@/app/components/ui/apple-cards-carousel"; // Import your Card component
-import { Carousel } from "@/app/components/ui/apple-cards-carousel"; // Import your Carousel component
-import { MovingBorder } from "./moving-border";
 import { InfiniteMovingCards } from "./infinite-moving-cards";
 
 interface VideoDetail {
