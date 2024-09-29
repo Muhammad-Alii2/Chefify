@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { NavbarDemo } from "./components/Navbar";
+import { NavbarDemo } from "./components/floating-navbar";
+import Head from "next/head";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,12 +18,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Head>
+      <script async src="node_modules/@material-tailwind/html/scripts/ripple.js"></script>
+        <script async src="https://unpkg.com/@material-tailwind/html@latest/scripts/ripple.js"></script>
+      </Head>
       <body className={inter.className}>
-         
-      <div className="relative w-full flex items-center justify-center">
-        <NavbarDemo />
+        <div className="relative w-full flex items-center justify-center">
+        <NavbarDemo className={undefined}/>
         </div>
-        {children}</body>
+        {children}
+      </body>
     </html>
   );
 }

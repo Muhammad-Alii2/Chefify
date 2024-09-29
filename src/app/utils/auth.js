@@ -9,13 +9,19 @@ export const authOptions = {
   },
   callbacks: {
     jwt: async ({ token }) => {
-      const db_user = await prisma.user.findFirst({
-        where: {
-          email: token.email,
-        },
-      });
-      if (db_user) {
-        token.id = db_user.id;
+      try {
+        const db_user = await prisma.user.findFirst({
+          where: {
+            email: token.email,
+          },
+        });
+        if (db_user) {
+          token.id = db_user.id;
+          token.name = db_user.name; // Ensure these fields exist
+          token.picture = db_user.image; // Ensure this field exists
+        }
+      } catch (error) {
+        console.error("Error fetching user in JWT callback:", error);
       }
       return token;
     },

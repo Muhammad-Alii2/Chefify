@@ -1,46 +1,58 @@
 import { NextResponse } from "next/server";
 import { getAuthSession } from "@/app/utils/auth";
-import {prisma} from "../../utils/db"
+import { prisma } from "../../utils/db";
 
-export async function POST(req, res) {
+// Example function to fetch video title based on video ID
+const fetchVideoTitle = async (id) => {
+  // Simulate fetching from an external source
+  // In a real scenario, replace this with an actual API call
+  return `Video Title for ID ${id}`; // Replace with actual fetching logic
+};
+
+export async function POST(req) {
   try {
-    const session = await getAuthSession()
+    const session = await getAuthSession();
 
     if (!session) {
       return NextResponse.json({
         success: false,
         error: "Unauthorized request"
-      },{ status: 500 })
+      }, { status: 500 });
     }
 
     const suggestion = await prisma.suggestion.findUnique({
-        where: {
-            userId: session.user.id,
-        },
-        select: {
-            videoIds: true,
-        },
+      where: {
+        userId: session.user.id,
+      },
+      select: {
+        videoIds: true // Return the video IDs
+      },
     });
 
     if (!suggestion) {
-        return NextResponse.json({
-          success: false,
-          error: "No suggestion found"
-        },{ status: 500 })
+      return NextResponse.json({
+        success: false,
+        error: "No suggestion found"
+      }, { status: 500 });
     }
 
+    // Fetch video details for each video ID
+    const videoDetailsPromises = suggestion.videoIds.map(async (id) => {
+      const title = await fetchVideoTitle(id); // Replace with your actual fetching logic
+      return { id, title };
+    });
+
+    const videoDetails = await Promise.all(videoDetailsPromises);
+
     return NextResponse.json({
-    success: true,
-    videoIds: suggestion.videoIds,
+      success: true,
+      videoDetails, // Return the array of video details (ID and title)
     });
   } catch (error) {
-    return NextResponse.json(
-      console.log(error),
-      {
-        success: false,
-        error: error,
-      },
-      { status: 500 }
-    );
+    console.error('Error:', error);
+    return NextResponse.json({
+      success: false,
+      error: error.message,
+    }, { status: 500 });
   }
 }

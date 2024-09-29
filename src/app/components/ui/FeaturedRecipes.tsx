@@ -1,13 +1,18 @@
-"use client";  // This marks the component as a Client Component
+"use client"; // This marks the component as a Client Component
 import { useEffect, useState } from "react";
+import { Card } from "@/app/components/ui/apple-cards-carousel"; // Import your Card component
+import { Carousel } from "@/app/components/ui/apple-cards-carousel"; // Import your Carousel component
+import { MovingBorder } from "./moving-border";
+import { InfiniteMovingCards } from "./infinite-moving-cards";
 
-interface FeaturedRecipeProps {
-  videoId: string;  
+interface VideoDetail {
+  id: string;
+  title: string;
 }
 
 export default function FeaturedRecipe() {
-  const [relatedVideos, setRelatedVideos] = useState<string[]>([]);  // Store the related video IDs
-  const [loading, setLoading] = useState(false);  // Handle the loading state
+  const [relatedVideos, setRelatedVideos] = useState<VideoDetail[]>([]); // Store video details
+  const [loading, setLoading] = useState(false); // Handle the loading state
 
   // Function to fetch related videos
   const fetchRelatedVideos = async () => {
@@ -19,11 +24,12 @@ export default function FeaturedRecipe() {
           "Content-Type": "application/json",
         },
       });
-      
-      const data = await response.json();  // Parse the API response
-      console.log('API Response:', data);  // Debug API response
-      if (data.success) {
-        setRelatedVideos(data.videoIds);  // Save related video IDs
+
+      const data = await response.json(); // Parse the API response
+      console.log('API Response:', data); // Debug API response
+
+      if (data.success && data.videoDetails) {
+        setRelatedVideos(data.videoDetails); // Save related video details (ID and title)
       } else {
         console.error("Error fetching related videos:", data.error);
       }
@@ -37,29 +43,27 @@ export default function FeaturedRecipe() {
     fetchRelatedVideos();
   }, []);
 
+  const videoItems = relatedVideos.map((video) => ({
+    videoUrl: `https://www.youtube.com/embed/${video.id}`, // Embed URL for the video
+    title: video.title,
+  }));
+  
   return (
-    <div>
-      <h2>Featured Recipe</h2>
-      {loading && <p>Loading related videos...</p>}  {/* Show loading message */}
-      {!loading && relatedVideos.length > 0 ? (  
-        <ul>
-          {relatedVideos.map((id) => (
-            <li key={id}>
-              <iframe
-                width="560"
-                height="315"
-                src={`https://www.youtube.com/embed/${id}`}
-                title="YouTube video"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            </li>
-          ))}
-        </ul>
+    <div className="w-full h-full py-20">
+      <h2 className="max-w-7xl mx-auto text-center text-xl md:text-5xl font-bold ">
+      <span style={{ fontFamily: "angrybird", color: "#fe9e0d" }}> Featured Recipes</span> 
+</h2>
+      {loading && <p>Loading related videos...</p>}
+      {!loading && relatedVideos.length > 0 ? (
+        <InfiniteMovingCards
+          items={videoItems}
+          direction="left" // Scroll direction
+          speed="normal"   // Scroll speed
+          pauseOnHover={true} // Pause scroll on hover
+        />
       ) : (
-        <p>No related videos found.</p> 
+        <p>No related videos found.</p>
       )}
     </div>
   );
-}
+}  

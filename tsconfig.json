@@ -21,6 +21,13 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/pages/Recipe/page.js", "src/app/pages/Recipe/page.js"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/app/pages/Recipe/page.js",
+    "src/app/components/floating-navbar.js" // Correct filename here
+, "src/app/components/UserStatus.js", "src/app/components/UserInfo.js"],
   "exclude": ["node_modules"]
 }

@@ -279,13 +279,23 @@ function App() {
         </div>
       </div>
       <div>
-        {videoIds && videoIds.length > 0 ? (
-          videoIds.map((id) => <p>{id}</p>)
+        {videoIds.length > 0 ? (
+          videoIds.map((id) => (
+            <div key={id} className="video-container">
+              <iframe
+                width="400"
+                height="250"
+                src={`https://www.youtube.com/embed/${id}`}
+                frameBorder="0"
+                allowFullScreen
+                title={`YouTube Video ${id}`}
+              ></iframe>
+            </div>
+          ))
         ) : (
           <p>No video IDs available</p>
         )}
       </div>
-      <footer></footer>
     </>
   );
 }
