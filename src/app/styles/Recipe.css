@@ -2,15 +2,15 @@
   background-color: black;
   color: white;
   border: 2px solid white;
-border-radius: 5px;
+  border-radius: 5px;
   padding: 8px 12px;
   font-size: 12px;
-  appearance: none; 
-  margin-left: 12px;/* Removes default arrow icon */
+  appearance: none;
+  margin-left: 12px;
 }
 
 .select option {
-  background-color: black;
+  background-color: grey;
   color: white;
 }
 
@@ -20,19 +20,17 @@ border-radius: 5px;
   cursor: not-allowed;
 }
 
-/* Improved CSS for a book-like text box */
-
 .book-text-box {
-  width: 600px;
-  height: 700px;
-  margin-right: 200px;
-  margin-top: 100px;
-  margin-bottom: 50px;
-  position: relative; /* For layering elements */
-  overflow: hidden; /* Prevent images from overflowing */
+  width: 150%; /* Full width */
+  max-width: 1200px; /* Limit maximum width for larger screens */
+  height: 1000px; /* Adjust height based on content */
+  margin: 10px auto; /* Center horizontally */
+  position: relative; /* Required for absolute positioning */
+  overflow: hidden; /* Prevent any overflow */
+  box-shadow: 0 0 0 0px rgba(0, 0, 0, 0); /* Shadow effect for depth */
 }
 
-.book-text-box::before, /* Background with contrast images */
+.book-text-box::before,
 .book-text-box::after {
   content: "";
   position: absolute;
@@ -41,62 +39,68 @@ border-radius: 5px;
   width: 100%;
   height: 100%;
   background-repeat: no-repeat;
-  background-size: cover;
-}
-
-.book-text-box {
-  position: relative;
-  width: 60%; /* Adjust the width as needed */
-  max-width: 800px;/* Adjust width as needed */
-  height: auto;
-  margin: 0 auto;
-  /* Adjust margins for positioning */
-  
-  overflow: hidden;
+  background-size: contain; /* Ensure the image is fully visible */
 }
 
 .book-text-box::before {
-  margin-top: 100px;
-  /* Ensure the image doesn't exceed the width of its container */
-  /* Light yellow background image (replace with your image) */
-  background-image: url("../../images/bg.png");
+  background-image: url("../../images/wood.png");
   opacity: 0.8; /* Adjust transparency for text visibility */
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  width: 110%;
+  margin-top: -2%;
+  height: 110%;
+  background-size: 120% 100%; /* Zoom out the wood image */
+  background-position: center 0; /* Keep the image centered */
+  transition: background-size 1.3s ease, background-position 1.3s ease;
+  margin-left: 0.1%;
+  z-index: -1;
+
 }
+
 .book-text-box::after {
-  /* Contrasting image on top (replace with your image) */
-  /* Adjust position and blend mode for desired effect */
-  content: "";
-  top: 50px; /* Increase the margin from the top */
-  left: 20px;
+  top: 85px; /* Adjust margin from the top */
+  left: 150px;
   transform: rotate(-5deg); /* Optional tilt for a dynamic look */
   mix-blend-mode: multiply; /* Darkens the background for image visibility */
   position: absolute;
-  width: 50%;
-  height: 50%;
+  width: 30%;
+  height: 35%;
+  
+  z-index: -1;
 }
 
 .book-inner {
-  /* Notetop: 100px;book-like inner container */
-  top: 100px;
   position: relative;
-  margin-top: 70px; /* Adjusted top margin */
-  margin-bottom: 70px; /* Fixed bottom margin */
-  margin-left: 0; /* Removed margin shorthand */
-  margin-right: 0; /* Removed margin shorthand */
-  padding: 50px;
-  
-  left: 80px;
-   
+  max-height: 30%;
+  padding: 100px 50px; /* Reduced padding for better spacing */
+  margin-top: 220px; /* Top margin adjustment */
+  margin-bottom: 80px; /* Adjusted bottom margin to remove excess space */
+  left: 27%; /* Center the text box */
+  width: 55%; /* Ensure it stays within the container */
 }
 
-.recipe-text { /* Handwritten font style (replace with preferred font) */
-  font-family: "Great Vibes", cursive; /* Example handwritten font */
-  font-size: 18px; /* Adjust font size for readability */
-  line-height: 1.5; /* Adjust line spacing for aesthetics */
+.recipe-text {
+  max-height: fit-content;
+  font-family: "Great Vibes", cursive;
+  font-size: 17px;
+  line-height: 1.0;
+  color: white; /* Maintain contrast with the background */
+  
+}
+
+.whitespace-pre-wrap {
+  white-space: pre-wrap; /* Preserve whitespace and wrap text correctly */
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .book-inner {
+    padding: 50px 20px;
+    width: 90%;
+    left: auto; /* Remove the manual centering */
+    margin: 0 auto; /* Automatically center */
+  }
+
+  .book-text-box::before {
+    background-size: 100% 100%; /* Further adjust for smaller screens */
+  }
 }

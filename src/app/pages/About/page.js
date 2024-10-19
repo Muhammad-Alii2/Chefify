@@ -1,7 +1,19 @@
 import React from "react";
+import UpsideAboutUs from "@/app/components/UpsideAboutUs"
+import ServiceAboutUs from "@/app/components/ServicesAboutUs"
 
-function About() {
-  return <div className="">about</div>;
-}
 
-export default About;
+const page = () => {
+  return (
+    <> 
+      <div>
+       <UpsideAboutUs />
+      </div>
+      <div>
+       <ServiceAboutUs />
+      </div>
+      
+    </>
+  );
+};
+export default page;

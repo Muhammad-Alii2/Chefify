@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { getAuthSession } from "@/app/utils/auth";
-import {prisma} from "../../utils/db"
+import { prisma } from "../../utils/db";
 import { NextResponse } from "next/server";
 import { searchYouTube, getRelatedVideos } from "../../utils/yt";
 
@@ -33,12 +33,12 @@ async function saveRecipe(userId, recipe, videoIds) {
       data: {
         userId,
         ...recipe,
-        videoIds
+        videoIds,
       },
     });
-    console.log('Recipe saved to database with videos:', savedRecipe);
+    console.log("Recipe saved to database with videos:", savedRecipe);
   } catch (error) {
-    console.error('Error saving recipe to database:', error);
+    console.error("Error saving recipe to database:", error);
   }
 }
 
@@ -52,7 +52,7 @@ async function saveRelatedVideos(userId) {
     },
   });
 
-  const allVideoIds = recipes.flatMap(recipe => recipe.videoIds);
+  const allVideoIds = recipes.flatMap((recipe) => recipe.videoIds);
 
   if (allVideoIds.length === 0) {
     return NextResponse.json(
@@ -89,89 +89,71 @@ async function saveRelatedVideos(userId) {
 }
 
 export async function GET(req) {
-  const session = await getAuthSession()
+  const session = await getAuthSession();
 
   if (!session) {
-    return NextResponse.json({
-      success: false,
-      error: "Unauthorized request"
-    },{ status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Unauthorized request",
+      },
+      { status: 500 }
+    );
   }
 
   const { searchParams } = new URL(req.url);
-  const ingredients = searchParams.get('ingredients');
-  const mealType = searchParams.get('mealType');
-  const cuisine = searchParams.get('cuisine');
-  const cookingTime = searchParams.get('cookingTime');
-  const complexity = searchParams.get('complexity');
+  const ingredients = searchParams.get("ingredients");
+  const mealType = searchParams.get("mealType"); // "Veg" or "Non-Veg"
+  const cuisine = searchParams.get("cuisine");
+  const cookingTime = searchParams.get("cookingTime");
+  const complexity = searchParams.get("complexity");
 
-  // Create a ReadableStream to stream data
   const stream = new ReadableStream({
     async start(controller) {
-      let fullRecipe = '';
-      let recipeName = '';
+      let fullRecipe = "";
+      let recipeName = "";
 
-      // Function to send messages as chunks
       const sendEvent = async (chunk) => {
         let chunkResponse;
         if (chunk.choices[0].finish_reason === "stop") {
-          // Search for videos on YouTube
           const videoIds = await searchYouTube(recipeName);
-
-          // Save the complete recipe and video IDs
           const recipe = {
-            name: recipeName || 'Unnamed Recipe', // Use the extracted name or a default
+            name: recipeName || "Unnamed Recipe",
             ingredients: ingredients,
             mealType: mealType,
             cuisine: cuisine,
             cookingTime: cookingTime,
             complexity: complexity,
-            instructions: fullRecipe
+            instructions: fullRecipe,
           };
 
           await saveRecipe(session.user.id, recipe, videoIds);
           await saveRelatedVideos(session.user.id);
 
-          // Send the final recipe and videoIds as a chunk in the stream
           chunkResponse = {
             action: "complete",
             recipe,
-            videoIds
+            videoIds,
           };
-          controller.enqueue(
-            `data: ${JSON.stringify(chunkResponse)}\n\n`
-          );
-
-          // End the stream after sending recipe and videoIds
-          controller.enqueue(
-            `data: ${JSON.stringify({ action: "close" })}\n\n`
-          );
+          controller.enqueue(`data: ${JSON.stringify(chunkResponse)}\n\n`);
+          controller.enqueue(`data: ${JSON.stringify({ action: "close" })}\n\n`);
           controller.close();
         } else {
-          if (
-            chunk.choices[0].delta.role &&
-            chunk.choices[0].delta.role === "assistant"
-          ) {
-            chunkResponse = {
-              action: "start",
-            };
+          if (chunk.choices[0].delta.role === "assistant") {
+            chunkResponse = { action: "start" };
           } else {
             chunkResponse = {
               action: "chunk",
               chunk: chunk.choices[0].delta.content,
             };
-            fullRecipe += chunk.choices[0].delta.content; // Accumulate the recipe
+            fullRecipe += chunk.choices[0].delta.content;
 
-            // Simple heuristic to extract recipe name from the response
             const nameMatch = fullRecipe.match(/Recipe Name:\s*(.*)/);
             if (nameMatch) {
               recipeName = nameMatch[1].trim();
             }
           }
-          // Enqueue each chunk as a part of the response
-          controller.enqueue(
-            `data: ${JSON.stringify(chunkResponse)}\n\n`
-          );
+          controller.enqueue(`data: ${JSON.stringify(chunkResponse)}\n\n`);
         }
       };
 
@@ -190,8 +172,15 @@ export async function GET(req) {
         "The recipe should highlight the fresh and vibrant flavors of the ingredients."
       );
       prompt.push(
-        "Also give the recipe a suitable name in its local language based on cuisine preference, and include it as 'Recipe Name: <Name>'."
+        "Also give the recipe a suitable name in its local language based on cuisine preference, and include it as 'Recipe Name: <Name>   Show First Recipe name then ingredients then step by step recipe    '."
       );
+    
+      // Add condition based on meal type
+      if (mealType === "Veg") {
+        prompt.push("Ensure the recipe is vegetarian.");
+      } else if (mealType === "Non-Veg") {
+        prompt.push("Ensure the recipe is non-vegetarian.");
+      }
 
       const messages = [
         {
@@ -200,12 +189,10 @@ export async function GET(req) {
         },
       ];
 
-      // Fetch the OpenAI completion and stream the result
       await fetchOpenAICompletionsStream(messages, sendEvent);
     },
   });
 
-  // Return the stream using NextResponse
   return new NextResponse(stream, {
     headers: {
       "Content-Type": "text/event-stream",

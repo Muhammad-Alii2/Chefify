@@ -21,6 +21,10 @@ export default function RootLayout({
       <Head>
       <script async src="node_modules/@material-tailwind/html/scripts/ripple.js"></script>
         <script async src="https://unpkg.com/@material-tailwind/html@latest/scripts/ripple.js"></script>
+        <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+/>
       </Head>
       <body className={inter.className}>
         <div className="relative w-full flex items-center justify-center">

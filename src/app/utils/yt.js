@@ -2,7 +2,7 @@ export async function searchYouTube(searchQuery) {
     searchQuery = searchQuery.replaceAll(" ", "+");
     console.count("youtube search");
     const response = await fetch(
-      `https://www.googleapis.com/youtube/v3/search?key=${process.env.YOUTUBE_API_KEY}&q=${searchQuery}&videoEmbeddable=true&type=video&maxResults=2`,
+      `https://www.googleapis.com/youtube/v3/search?key=${process.env.YOUTUBE_API_KEY}&q=${searchQuery}&videoEmbeddable=true&type=video&maxResults=4`,
       {
         method: "GET",
       }

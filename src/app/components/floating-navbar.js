@@ -13,7 +13,7 @@ export const NavbarDemo = async ({ className }) => {
 
   const navItems = [
     { name: "Home", link: "/" },
-    { name: "Contact", link: "/" },
+    { name: "Contact", link: "../pages/contactus" },
     { name: "About", link: "../pages/About" },
   ];
 

@@ -70,7 +70,7 @@ function App() {
         setVideoIds(videoIds);
       }
     };
-console.log(videoIds);
+
     eventSourceRef.current.onerror = () => {
       eventSourceRef.current.close();
     };
@@ -90,33 +90,48 @@ console.log(videoIds);
 
   return (
     <>
-      <div>
-        <div className="App">
-          <div className="flex flex-row h-full my-4 gap-2 justify-center">
-            <RecipeCard onSubmit={onSubmit} />
-            <div className="book-text-box w-[400px] h-[565px] text-xs text-gray-600 p-4 shadow-xl whitespace-pre-line overflow-y-auto">
-              <div className="book-inner" style={{ marginRight: "200px", marginTop: "100px" }}>
-                <div className="recipe-text">{recipeText}</div>
+      <div className="App">
+        <div className="flex flex-row h-full my-4 gap-2 justify-center">
+          <RecipeCard onSubmit={onSubmit} />
+          <div className="book-text-box relative w-1/2 text-gray-600">
+            <div className="book-inner relative px-8 py-10">
+              <div className="recipe-text font-[Great Vibes] text-lg leading-relaxed whitespace-pre-wrap">
+                {recipeText}
               </div>
             </div>
           </div>
         </div>
-        {videoIds.length > 0 ? (
-          videoIds.map((id) => (
-            <div key={id} className="video-container">
-              <iframe
-                width="400"
-                height="250"
-                src={`https://www.youtube.com/embed/${id}`}
-                frameBorder="0"
-                allowFullScreen
-                title={`YouTube Video ${id}`}
-              ></iframe>
-            </div>
-          ))
-        ) : (
-          <p>No video IDs available</p>
-        )}
+      </div>
+
+      {/* YouTube videos displayed below the recipe text */}
+      <div className="flex flex-col items-center mt-8 space-y-6">
+        <h2 className="text-2xl font-bold text-white">Watch These Videos</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {videoIds.length > 0 ? (
+            videoIds.slice(0, 4).map((id) => (
+              <div
+                key={id}
+                className="video-card w-[340px] margin-30 bg-gray-800 bg-gradient-to-r from-purple-500 to-grey-500 mb-40 text-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105 duration-300"
+              >
+                <iframe
+                  width="100%"
+                  height="200"
+                  src={`https://www.youtube.com/embed/${id}`}
+                  frameBorder="0"
+                  allowFullScreen
+                  title={`YouTube Video ${id}`}
+                  className="rounded-t-lg"
+                ></iframe>
+                <div className="p-1 text-center ">
+                  <h3 className="text-lg font-semibold">Watch Now!</h3>
+                  
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-black">.</p>
+          )}
+        </div>
       </div>
     </>
   );
