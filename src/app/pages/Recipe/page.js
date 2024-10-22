@@ -1,15 +1,16 @@
-"use client";
+"use client"; 
 import React, { useEffect, useRef, useState } from "react";
 import RecipeCard from "@/app/components/RecipeCard"; // Import RecipeCard
 
 function App() {
-  const [videoIds, setVideoIds] = useState("");
+  const [videoIds, setVideoIds] = useState([]);
   const [recipeData, setRecipeData] = useState(null);
   const [recipeText, setRecipeText] = useState("");
   const [text, setText] = useState("");
   const [audioFile, setAudioFile] = useState();
   const [translatedText, setTranslatedText] = useState("");
-  const [selectedLanguage, setSelectedLanguage] = useState("ur");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [errorMessage, setErrorMessage] = useState(""); // State for error messages
 
   const handleTranslateClick = () => {
     setTranslatedText(`Translation for ${selectedLanguage}: ${recipeText}`);
@@ -68,6 +69,13 @@ function App() {
       } else if (data.action === "complete") {
         const { videoIds } = await data;
         setVideoIds(videoIds);
+
+        // Set error message if no video IDs are found
+        if (videoIds.length === 0) {
+          setErrorMessage("Oops! Sorry, related videos have not been found.");
+        } else {
+          setErrorMessage(""); // Clear error message if videos are found
+        }
       }
     };
 
@@ -86,6 +94,8 @@ function App() {
   async function onSubmit(data) {
     setRecipeText("");
     setRecipeData(data);
+    setVideoIds([]); // Reset video IDs and error message
+    setErrorMessage(""); // Clear previous error message
   }
 
   return (
@@ -106,6 +116,7 @@ function App() {
       {/* YouTube videos displayed below the recipe text */}
       <div className="flex flex-col items-center mt-8 space-y-6">
         <h2 className="text-2xl font-bold text-white">Watch These Videos</h2>
+        {errorMessage && <p className="text-red-500">{errorMessage}</p>} {/* Show error message */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {videoIds.length > 0 ? (
             videoIds.slice(0, 4).map((id) => (
@@ -124,12 +135,11 @@ function App() {
                 ></iframe>
                 <div className="p-1 text-center ">
                   <h3 className="text-lg font-semibold">Watch Now!</h3>
-                  
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-black">.</p>
+            !errorMessage && <p className="text-gray-300">Loading videos...</p> // Show loading message
           )}
         </div>
       </div>
