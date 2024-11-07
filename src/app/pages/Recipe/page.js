@@ -1,6 +1,7 @@
 "use client"; 
 import React, { useEffect, useRef, useState } from "react";
 import RecipeCard from "@/app/components/RecipeCard"; // Import RecipeCard
+import styles from "@/app/styles/Recipe.css";
 
 function App() {
   const [videoIds, setVideoIds] = useState([]);

@@ -15,6 +15,7 @@ export const NavbarDemo = async ({ className }) => {
     { name: "Home", link: "/" },
     { name: "Contact", link: "../pages/contactus" },
     { name: "About", link: "../pages/About" },
+    { name: "Gallery", link: "../pages/Gallery" },
   ];
 
   return (
